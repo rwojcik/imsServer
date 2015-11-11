@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
+﻿using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -51,7 +47,7 @@ namespace IMSServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            if (id != deviceModel.DeviceId)
+            if (id != deviceModel.Id)
             {
                 return BadRequest();
             }
@@ -94,7 +90,7 @@ namespace IMSServer.Controllers
             }
             catch (DbUpdateException)
             {
-                if (DeviceModelExists(deviceModel.DeviceId))
+                if (DeviceModelExists(deviceModel.Id))
                 {
                     return Conflict();
                 }
@@ -104,7 +100,7 @@ namespace IMSServer.Controllers
                 }
             }
 
-            return CreatedAtRoute("DefaultApi", new { id = deviceModel.DeviceId }, deviceModel);
+            return CreatedAtRoute("DefaultApi", new { id = deviceModel.Id }, deviceModel);
         }
 
         // DELETE: api/Device/5
@@ -134,7 +130,7 @@ namespace IMSServer.Controllers
 
         private bool DeviceModelExists(long id)
         {
-            return _dbContext.DeviceModels.Count(e => e.DeviceId == id) > 0;
+            return _dbContext.DeviceModels.Count(e => e.Id == id) > 0;
         }
     }
 }

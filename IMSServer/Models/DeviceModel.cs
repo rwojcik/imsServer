@@ -1,28 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IMSServer.Models
 {
-    public abstract class DeviceModel
+    public abstract class DeviceModel : ModelBase
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long DeviceId { get; set; }
-
-        [Required]
-        public DateTime CreatedAt { get; set; }
-
-        [Required]
-        public DateTime UpdatedAt { get; set; }
-
-        [Required]
-        public string CreatedBy { get; set; }
-
-        [Required]
-        public string UpdatedBy { get; set; }
-
         [Required, Index("UniqueDeviceName", IsUnique = true)]
         public string Name { get; set; }
 

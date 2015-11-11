@@ -1,29 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IMSServer.Models
 {
-    public class BuildingModel
+    public class BuildingModel : ModelBase
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long BuildingId { get; set; }
-
-        [Required]
-        public DateTime CreatedAt { get; set; }
-
-        [Required]
-        public DateTime UpdatedAt { get; set; }
-
-        [Required]
-        public string CreatedBy { get; set; }
-
-        [Required]
-        public string UpdatedBy { get; set; }
-
-        [Required]
+        [Required, Index("UniqueBuildingName", IsUnique = true)]
         public string Name { get; set; }
 
         public string Description { get; set; }

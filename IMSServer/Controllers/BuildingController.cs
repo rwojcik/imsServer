@@ -1,33 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
+using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using IMSServer.Models;
+using IMSServer.Repositories;
 using IMSServer.ViewModels;
 
 namespace IMSServer.Controllers
 {
     public class BuildingController : ApiController
     {
-        private readonly IMSServerContext _dbContext = new IMSServerContext();
+        private readonly BuildingRepository _repository;
+
+        public BuildingController()
+        {
+            _repository = new BuildingRepository(new IMSServerContext(), User.Identity.Name);
+        }
 
         // GET: api/Building
-        public IQueryable<BuildingViewModel> GetBuildingModels()
+        public IEnumerable<BuildingViewModel> GetBuildingModels()
         {
-            return _dbContext.BuildingModels.Select(building => new BuildingViewModel
+            return _repository.GetAll().Select(building => new BuildingViewModel
             {
-                BuildingId = building.BuildingId,
+                BuildingId = building.Id,
                 CreatedAt = building.CreatedAt,
                 CreatedBy = building.CreatedBy,
                 Description = building.Description,
-                DevicesIds = building.Devices.Select(device => device.DeviceId).ToList(),
+                DevicesIds = building.Devices.Select(device => device.Id).ToList(),
                 Name = building.Name,
                 UpdatedAt = building.UpdatedAt,
                 UpdatedBy = building.CreatedBy
@@ -38,7 +42,7 @@ namespace IMSServer.Controllers
         [ResponseType(typeof(BuildingViewModel))]
         public async Task<IHttpActionResult> GetBuildingModel(long id)
         {
-            var buildingModel = await _dbContext.BuildingModels.FindAsync(id);
+            var buildingModel = await _repository.FindAsync(id);
             if (buildingModel == null)
             {
                 return NotFound();
@@ -46,11 +50,11 @@ namespace IMSServer.Controllers
 
             var buildingVm = new BuildingViewModel
             {
-                BuildingId = buildingModel.BuildingId,
+                BuildingId = buildingModel.Id,
                 CreatedAt = buildingModel.CreatedAt,
                 CreatedBy = buildingModel.CreatedBy,
                 Description = buildingModel.Description,
-                DevicesIds = buildingModel.Devices.Select(device => device.DeviceId).ToList(),
+                DevicesIds = buildingModel.Devices.Select(device => device.Id).ToList(),
                 Name = buildingModel.Name,
                 UpdatedAt = buildingModel.UpdatedAt,
                 UpdatedBy = buildingModel.CreatedBy
@@ -74,18 +78,16 @@ namespace IMSServer.Controllers
                 return BadRequest("Ids do not match");
             }
 
-            var buildingModel = await _dbContext.BuildingModels.FindAsync(buildingVm.BuildingId);
+            var buildingModel = await _repository.FindAsync(buildingVm.BuildingId);
 
             if (buildingModel == null) return NotFound();
 
             buildingModel.Description = buildingVm.Description;
             buildingModel.Description = buildingVm.Description;
-            buildingModel.UpdatedAt = DateTime.Now;
-            buildingModel.UpdatedBy = User.Identity.Name;
 
             try
             {
-                await _dbContext.SaveChangesAsync();
+                await _repository.UpdateAsync(buildingModel);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -109,31 +111,27 @@ namespace IMSServer.Controllers
             {
                 Name = buildingVm.Name,
                 Description = buildingVm.Description,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-                CreatedBy = User.Identity.Name,
-                UpdatedBy = User.Identity.Name,
             };
 
-            _dbContext.BuildingModels.Add(buildingModel);
 
             try
             {
-                await _dbContext.SaveChangesAsync();
+                await _repository.AddAsync(buildingModel);
             }
             catch (DbUpdateException)
             {
                 return BadRequest();
             }
 
-            return CreatedAtRoute("DefaultApi", new { id = buildingModel.BuildingId }, buildingModel);
+            return CreatedAtRoute("DefaultApi", new { id = buildingModel.Id }, buildingModel);
         }
 
         // DELETE: api/Building/5
         [ResponseType(typeof(BuildingModel))]
         public async Task<IHttpActionResult> DeleteBuildingModel(long id)
         {
-            var buildingModel = await _dbContext.BuildingModels.FindAsync(id);
+            var buildingModel = await _repository.RemoveAsync(id);
+
             if (buildingModel == null)
             {
                 return NotFound();
@@ -141,34 +139,17 @@ namespace IMSServer.Controllers
 
             var buildingVm = new BuildingViewModel
             {
-                BuildingId = buildingModel.BuildingId,
+                BuildingId = buildingModel.Id,
                 CreatedAt = buildingModel.CreatedAt,
                 CreatedBy = buildingModel.CreatedBy,
                 Description = buildingModel.Description,
-                DevicesIds = buildingModel.Devices.Select(device => device.DeviceId).ToList(),
+                DevicesIds = buildingModel.Devices.Select(device => device.Id).ToList(),
                 Name = buildingModel.Name,
                 UpdatedAt = buildingModel.UpdatedAt,
                 UpdatedBy = buildingModel.CreatedBy
             };
 
-            _dbContext.BuildingModels.Remove(buildingModel);
-            await _dbContext.SaveChangesAsync();
-
             return Ok(buildingVm);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _dbContext.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        private bool BuildingModelExists(long id)
-        {
-            return _dbContext.BuildingModels.Any(e => e.BuildingId == id);
         }
     }
 }

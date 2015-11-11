@@ -217,6 +217,9 @@
     <Compile Include="Models\DeviceHistoryModel.cs" />
     <Compile Include="Models\DeviceModel.cs" />
     <Compile Include="Models\IMSServerContext.cs" />
+    <Compile Include="Models\ModelBase.cs" />
+    <Compile Include="Repositories\BuildingRepository.cs" />
+    <Compile Include="Repositories\IRepository.cs" />
     <Compile Include="ViewModels\BuildingViewModels.cs" />
     <Compile Include="ViewModels\DeviceViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />

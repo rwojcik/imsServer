@@ -4,23 +4,27 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IMSServer.Models
 {
-    public abstract class DeviceHistoryModel
+    public abstract class DeviceHistoryModel : ModelBase
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long HistoryId { get; set; }
-
-        [Required]
-        public DateTime RecordedAt { get; set; }
-
         [Required]
         public long DeviceId { get; set; }
 
         [ForeignKey("DeviceId")]
         public DeviceModel Device { get; set; }
 
-        [Required]
-        public string ChangedBy { get; set; }
+        [NotMapped]
+        public string ChangedBy
+        {
+            get { return CreatedBy; }
+            set { CreatedBy = value; }
+        }
+
+        [NotMapped]
+        public DateTime RecordedAt
+        {
+            get { return CreatedAt; }
+            set { CreatedAt = value; }
+        }
     }
 
     public class BinaryDeviceHistoryModel : DeviceHistoryModel

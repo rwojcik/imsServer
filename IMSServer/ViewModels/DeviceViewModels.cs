@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace IMSServer.ViewModels
+﻿namespace IMSServer.ViewModels
 {
     public class DeviceViewModel
     {
