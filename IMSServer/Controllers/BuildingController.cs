@@ -19,7 +19,7 @@ namespace IMSServer.Controllers
 
         public BuildingController()
         {
-            _repository = new BuildingRepository(new IMSServerContext(), User.Identity.Name);
+            _repository = new BuildingRepository();
         }
 
         // GET: api/Building
@@ -34,7 +34,7 @@ namespace IMSServer.Controllers
                 DevicesIds = building.Devices.Select(device => device.Id).ToList(),
                 Name = building.Name,
                 UpdatedAt = building.UpdatedAt,
-                UpdatedBy = building.CreatedBy
+                UpdatedBy = building.CreatedBy,
             });
         }
 
@@ -57,7 +57,7 @@ namespace IMSServer.Controllers
                 DevicesIds = buildingModel.Devices.Select(device => device.Id).ToList(),
                 Name = buildingModel.Name,
                 UpdatedAt = buildingModel.UpdatedAt,
-                UpdatedBy = buildingModel.CreatedBy
+                UpdatedBy = buildingModel.CreatedBy,
             };
 
             return Ok(buildingVm);
@@ -78,16 +78,19 @@ namespace IMSServer.Controllers
                 return BadRequest("Ids do not match");
             }
 
-            var buildingModel = await _repository.FindAsync(buildingVm.BuildingId);
-
-            if (buildingModel == null) return NotFound();
-
-            buildingModel.Description = buildingVm.Description;
-            buildingModel.Description = buildingVm.Description;
+            var buildingModel = new BuildingModel
+            {
+                Id = buildingVm.BuildingId,
+                Description = buildingVm.Description,
+                Name = buildingVm.Name,
+            };
 
             try
             {
-                await _repository.UpdateAsync(buildingModel);
+                if (await _repository.UpdateAsync(buildingModel) == null)
+                {
+                    return NotFound();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -112,8 +115,7 @@ namespace IMSServer.Controllers
                 Name = buildingVm.Name,
                 Description = buildingVm.Description,
             };
-
-
+            
             try
             {
                 await _repository.AddAsync(buildingModel);

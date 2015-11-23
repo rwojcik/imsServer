@@ -12,12 +12,10 @@ namespace IMSServer.Repositories
     public class BuildingRepository : IRepository<BuildingModel>
     {
         private readonly IMSServerContext _dbContext;
-        private readonly string _userName;
 
-        public BuildingRepository(IMSServerContext dbContext, string userName)
+        public BuildingRepository()
         {
-            _dbContext = dbContext;
-            _userName = userName;
+            _dbContext = new IMSServerContext();
         }
 
         public BuildingModel Get(long id)
@@ -53,12 +51,7 @@ namespace IMSServer.Repositories
         public BuildingModel Add(BuildingModel entity)
         {
             if (entity == null) return null;
-
-            entity.CreatedAt = DateTime.Now;
-            entity.UpdatedAt = DateTime.Now;
-            entity.UpdatedBy = _userName;
-            entity.CreatedBy = _userName;
-
+            
             var newEntity = _dbContext.BuildingModels.Add(entity);
             _dbContext.SaveChanges();
             return newEntity;
@@ -67,12 +60,7 @@ namespace IMSServer.Repositories
         public async Task<BuildingModel> AddAsync(BuildingModel entity)
         {
             if (entity == null) return null;
-
-            entity.CreatedAt = DateTime.Now;
-            entity.UpdatedAt = DateTime.Now;
-            entity.UpdatedBy = _userName;
-            entity.CreatedBy = _userName;
-
+            
             var newEntity = _dbContext.BuildingModels.Add(entity);
 
             await _dbContext.SaveChangesAsync();
@@ -111,7 +99,7 @@ namespace IMSServer.Repositories
             old.Name = entity.Name;
             old.Description = entity.Description;
             old.UpdatedAt = DateTime.Now;
-            old.UpdatedBy = _userName;
+            old.UpdatedBy = entity.UpdatedBy;
 
             _dbContext.SaveChanges();
 
@@ -127,8 +115,8 @@ namespace IMSServer.Repositories
             old.Name = entity.Name;
             old.Description = entity.Description;
             old.UpdatedAt = DateTime.Now;
-            old.UpdatedBy = _userName;
-
+            old.UpdatedBy = entity.UpdatedBy;
+            
             await _dbContext.SaveChangesAsync();
 
             return old;
