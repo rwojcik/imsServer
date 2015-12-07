@@ -52,6 +52,12 @@ namespace IMSServer.Repositories
             if (entity == null) return null;
 
             var newEntity = _dbContext.DeviceModels.Add(entity);
+            
+            _dbContext.SaveChanges();
+            
+            var historyEntry = newEntity.CreateDeviceHistoryModel();
+
+            newEntity.DeviceHistory.Add(historyEntry);
 
             _dbContext.SaveChanges();
 
@@ -63,6 +69,12 @@ namespace IMSServer.Repositories
             if (entity == null) return null;
 
             var newEntity = _dbContext.DeviceModels.Add(entity);
+
+            await _dbContext.SaveChangesAsync();
+
+            var historyEntry = newEntity.CreateDeviceHistoryModel();
+
+            newEntity.DeviceHistory.Add(historyEntry);
 
             await _dbContext.SaveChangesAsync();
 

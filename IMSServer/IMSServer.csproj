@@ -218,6 +218,7 @@
     <Compile Include="Models\DeviceModel.cs" />
     <Compile Include="Models\IMSServerContext.cs" />
     <Compile Include="Models\ModelBase.cs" />
+    <Compile Include="Repositories\DeviceRepository.cs" />
     <Compile Include="Repositories\GroupRepository.cs" />
     <Compile Include="Repositories\IRepository.cs" />
     <Compile Include="ViewModels\GroupViewModels.cs" />

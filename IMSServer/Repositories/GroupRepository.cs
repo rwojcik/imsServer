@@ -23,9 +23,9 @@ namespace IMSServer.Repositories
             return _dbContext.GroupModels.FirstOrDefault(x => x.Id == id);
         }
 
-        public async Task<GroupModel> FindAsync(long id)
+        public Task<GroupModel> FindAsync(long id)
         {
-            return await _dbContext.GroupModels.FindAsync(id);
+            return _dbContext.GroupModels.FindAsync(id);
         }
 
         public IEnumerable<GroupModel> GetAll(Expression<Func<GroupModel, bool>> predicate)
@@ -81,7 +81,7 @@ namespace IMSServer.Repositories
 
         public async Task<GroupModel> RemoveAsync(long id)
         {
-            var entity = await GetFirstAsync(id);
+            var entity = await FindAsync(id);
             if (entity == null) return null;
             _dbContext.GroupModels.Remove(entity);
 

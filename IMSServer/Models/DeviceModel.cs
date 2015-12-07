@@ -21,9 +21,6 @@ namespace IMSServer.Models
         [Required]
         public DeviceType DeviceType { get; set; }
 
-        [Required]
-        public bool RecordHistory { get; set; }
-
         public virtual ICollection<DeviceHistoryModel> DeviceHistory { get; set; }
     }
 
@@ -47,13 +44,13 @@ namespace IMSServer.Models
         Alarm = 6,
     }
 
-    public static class UpdateGeneric
+    public static class DeviceGenericOps
     {
         public static void UpdateModelGeneric(this DeviceModel oldModel, DeviceModel newModel)
         {
             if (oldModel.GetType() != newModel.GetType())
             {
-                throw new IncompatibleTypeExceprion($"Expected {oldModel.GetType()}, but got {newModel.GetType()}");
+                throw new IncompatibleTypeException($"Expected {oldModel.GetType()}, but got {newModel.GetType()}.");
             }
 
             oldModel.Name = newModel.Name;
@@ -77,19 +74,52 @@ namespace IMSServer.Models
                 continousOldModel.ContinousSetting = continousNewModel.ContinousSetting;
             }
         }
+
+        public static DeviceHistoryModel CreateDeviceHistoryModel(this DeviceModel model)
+        {
+            DeviceHistoryModel historyModel = null;
+
+            if (model is BinarySettingDeviceModel)
+            {
+                var binaryModel = (BinarySettingDeviceModel)model;
+
+                historyModel = new BinaryDeviceHistoryModel
+                {
+                    BinarySetting = binaryModel.BinarySetting
+                };
+            }
+            else if (model is ContinousSettingDeviceModel)
+            {
+                var continousModel = (ContinousSettingDeviceModel)model;
+
+                historyModel = new ContinousDeviceHistoryModel
+                {
+                    ContinousSetting = continousModel.ContinousSetting
+                };
+            }
+
+            if(historyModel == null) throw new IncompatibleTypeException($"Given type {model.GetType()} was not recognized.");
+
+            historyModel.ChangedBy = model.UpdatedBy;
+            historyModel.RecordedAt = model.UpdatedAt;
+            historyModel.Device = model;
+            historyModel.DeviceId = model.Id;
+            
+            return historyModel;
+        }
     }
 
-    public class IncompatibleTypeExceprion : Exception
+    public class IncompatibleTypeException : Exception
     {
-        public IncompatibleTypeExceprion()
+        public IncompatibleTypeException()
         {
         }
 
-        public IncompatibleTypeExceprion(string msg) : base(msg)
+        public IncompatibleTypeException(string msg) : base(msg)
         {
         }
 
-        public IncompatibleTypeExceprion(string msg, Exception inner) : base(msg, inner)
+        public IncompatibleTypeException(string msg, Exception inner) : base(msg, inner)
         {
         }
     }
