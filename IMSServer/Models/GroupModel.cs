@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace IMSServer.Models
 {
-    public class BuildingModel : ModelBase
+    public class GroupModel : ModelBase
     {
-        [Required, Index("UniqueBuildingName", IsUnique = true)]
+        [Required, Index("UniqueGroupName", IsUnique = true)]
         public string Name { get; set; }
 
         public string Description { get; set; }

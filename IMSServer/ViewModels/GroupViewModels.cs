@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace IMSServer.ViewModels
 {
-    public class BuildingViewModel
+    public class GroupViewModel
     {
         public long BuildingId { get; set; }
 
@@ -22,16 +22,16 @@ namespace IMSServer.ViewModels
         public ICollection<long> DevicesIds { get; set; }
     }
     
-    public class AddBuildingViewModel
+    public class AddGroupViewModel
     {
         public string Name { get; set; }
 
         public string Description { get; set; }
     }
 
-    public class UpdateBuildingViewModel
+    public class UpdateGroupViewModel
     {
-        public long BuildingId { get; set; }
+        public long GroupId { get; set; }
 
         public string Name { get; set; }
 

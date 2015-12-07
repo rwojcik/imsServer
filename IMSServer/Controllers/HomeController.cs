@@ -10,5 +10,7 @@ namespace IMSServer.Controllers
 
             return View();
         }
+
+        public static int Sum(int a, int b) => a + b;
     }
 }

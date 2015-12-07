@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -13,19 +11,19 @@ using IMSServer.ViewModels;
 
 namespace IMSServer.Controllers
 {
-    public class BuildingController : ApiController
+    public class GroupController : ApiController
     {
-        private readonly BuildingRepository _repository;
+        private readonly GroupRepository _repository;
 
-        public BuildingController()
+        public GroupController()
         {
-            _repository = new BuildingRepository();
+            _repository = new GroupRepository();
         }
 
-        // GET: api/Building
-        public IEnumerable<BuildingViewModel> GetBuildingModels()
+        // GET: api/Group
+        public IEnumerable<GroupViewModel> GetGroupModels()
         {
-            return _repository.GetAll().Select(building => new BuildingViewModel
+            return _repository.GetAll().Select(building => new GroupViewModel
             {
                 BuildingId = building.Id,
                 CreatedAt = building.CreatedAt,
@@ -38,9 +36,9 @@ namespace IMSServer.Controllers
             });
         }
 
-        // GET: api/Building/5
-        [ResponseType(typeof(BuildingViewModel))]
-        public async Task<IHttpActionResult> GetBuildingModel(long id)
+        // GET: api/Group/5
+        [ResponseType(typeof(GroupViewModel))]
+        public async Task<IHttpActionResult> GetGroupModel(long id)
         {
             var buildingModel = await _repository.FindAsync(id);
             if (buildingModel == null)
@@ -48,7 +46,7 @@ namespace IMSServer.Controllers
                 return NotFound();
             }
 
-            var buildingVm = new BuildingViewModel
+            var buildingVm = new GroupViewModel
             {
                 BuildingId = buildingModel.Id,
                 CreatedAt = buildingModel.CreatedAt,
@@ -63,26 +61,26 @@ namespace IMSServer.Controllers
             return Ok(buildingVm);
         }
 
-        // PUT: api/Building/5
+        // PUT: api/Group/5
         // Update
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutBuildingModel(long id, UpdateBuildingViewModel buildingVm)
+        public async Task<IHttpActionResult> PutGroupModel(long id, UpdateGroupViewModel groupVm)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != buildingVm.BuildingId)
+            if (id != groupVm.GroupId)
             {
                 return BadRequest("Ids do not match");
             }
 
-            var buildingModel = new BuildingModel
+            var buildingModel = new GroupModel
             {
-                Id = buildingVm.BuildingId,
-                Description = buildingVm.Description,
-                Name = buildingVm.Name,
+                Id = groupVm.GroupId,
+                Description = groupVm.Description,
+                Name = groupVm.Name,
             };
 
             try
@@ -100,20 +98,20 @@ namespace IMSServer.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST: api/Building
+        // POST: api/Group
         // Add
-        [ResponseType(typeof(BuildingModel))]
-        public async Task<IHttpActionResult> PostBuildingModel(AddBuildingViewModel buildingVm)
+        [ResponseType(typeof(GroupModel))]
+        public async Task<IHttpActionResult> PostGroupModel(AddGroupViewModel groupVm)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var buildingModel = new BuildingModel
+            var buildingModel = new GroupModel
             {
-                Name = buildingVm.Name,
-                Description = buildingVm.Description,
+                Name = groupVm.Name,
+                Description = groupVm.Description,
             };
             
             try
@@ -128,9 +126,9 @@ namespace IMSServer.Controllers
             return CreatedAtRoute("DefaultApi", new { id = buildingModel.Id }, buildingModel);
         }
 
-        // DELETE: api/Building/5
-        [ResponseType(typeof(BuildingModel))]
-        public async Task<IHttpActionResult> DeleteBuildingModel(long id)
+        // DELETE: api/Group/5
+        [ResponseType(typeof(GroupModel))]
+        public async Task<IHttpActionResult> DeleteGroupModel(long id)
         {
             var buildingModel = await _repository.RemoveAsync(id);
 
@@ -139,7 +137,7 @@ namespace IMSServer.Controllers
                 return NotFound();
             }
 
-            var buildingVm = new BuildingViewModel
+            var buildingVm = new GroupViewModel
             {
                 BuildingId = buildingModel.Id,
                 CreatedAt = buildingModel.CreatedAt,

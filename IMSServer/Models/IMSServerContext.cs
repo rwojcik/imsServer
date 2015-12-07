@@ -15,7 +15,7 @@ namespace IMSServer.Models
         {
         }
 
-        public DbSet<BuildingModel> BuildingModels { get; set; }
+        public DbSet<GroupModel> GroupModels { get; set; }
 
         public DbSet<DeviceModel> DeviceModels { get; set; }
     }

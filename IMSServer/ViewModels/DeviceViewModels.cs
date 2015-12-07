@@ -5,7 +5,7 @@
         public long DeviceId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public BuildingViewModel Building { get; set; }
+        public GroupViewModel Group { get; set; }
     }
 
     public class AddDeviceViewModel
