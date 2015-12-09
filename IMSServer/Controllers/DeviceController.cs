@@ -1,104 +1,101 @@
-﻿using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using IMSServer.Models;
+using IMSServer.Repositories;
 using IMSServer.ViewModels;
 
 namespace IMSServer.Controllers
 {
     public class DeviceController : ApiController
     {
-        private readonly IMSServerContext _dbContext = new IMSServerContext();
+        private readonly DeviceRepository _deviceRepository;
+        private readonly string _userName;
+
+        public DeviceController()
+        {
+            _userName = User?.Identity?.Name ?? "Anonymous";
+            _deviceRepository = new DeviceRepository(_userName);
+        }
 
         // GET: api/Device
-        public IQueryable<DeviceModel> GetDeviceModels()
+        public IEnumerable<DeviceViewModel> GetDeviceModels()
         {
-            return _dbContext.DeviceModels;
+            var devices = _deviceRepository.GetAll().Select(device => device.CreateDeviceViewModel());
+
+            return devices;
         }
 
         // GET: api/Device/5
         [ResponseType(typeof(DeviceViewModel))]
         public async Task<IHttpActionResult> GetDeviceModel(long id)
         {
-            DeviceModel deviceModel = await _dbContext.DeviceModels.FindAsync(id);
+            var deviceModel = await _deviceRepository.FindAsync(id);
             if (deviceModel == null)
             {
                 return NotFound();
             }
 
-            var deviceVm = new DeviceViewModel
-            {
-                
-            };
+            var deviceVm = deviceModel.CreateDeviceViewModel();
 
             return Ok(deviceVm);
         }
 
         // PUT: api/Device/5
+        // update
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutDeviceModel(long id, DeviceModel deviceModel)
+        public async Task<IHttpActionResult> PutDeviceModel(long id, UpdateDeviceViewModel updateDeviceViewModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
-            if (id != deviceModel.Id)
+            if (id != updateDeviceViewModel.DeviceId)
             {
-                return BadRequest();
+                return BadRequest("Ids do not match!");
             }
 
-            _dbContext.Entry(deviceModel).State = EntityState.Modified;
+            //_dbContext.Entry(updateDeviceViewModel).State = EntityState.Modified;
 
-            try
+            var deviceModel = _deviceRepository.Get(id);
+
+            if (deviceModel == null)
             {
-                await _dbContext.SaveChangesAsync();
+                return NotFound();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DeviceModelExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            deviceModel.Name = updateDeviceViewModel.Name;
+            deviceModel.Description = updateDeviceViewModel.Description;
+            deviceModel.GroupId = updateDeviceViewModel.GroupId;
+            deviceModel.AuditEntity(_userName);
+
+            await _deviceRepository.UpdateAsync(deviceModel);
 
             return StatusCode(HttpStatusCode.NoContent);
         }
 
         // POST: api/Device
-        [ResponseType(typeof(DeviceModel))]
-        public async Task<IHttpActionResult> PostDeviceModel(DeviceModel deviceModel)
+        // add
+        [ResponseType(typeof(void))]
+        public async Task<IHttpActionResult> PostDeviceModel(AddDeviceViewModel addDeviceViewModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _dbContext.DeviceModels.Add(deviceModel);
+            var existingDevice = await _deviceRepository.GetFirstAsync(device => device.Name == addDeviceViewModel.Name);
+            if (existingDevice != null)
+                return BadRequest("Name is taken");
 
-            try
-            {
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (DeviceModelExists(deviceModel.Id))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            var deviceModel = addDeviceViewModel.CreateDeviceModel();
+
+            deviceModel.AuditEntity(_userName);
+
+            await _deviceRepository.AddAsync(deviceModel);
 
             return CreatedAtRoute("DefaultApi", new { id = deviceModel.Id }, deviceModel);
         }
@@ -107,30 +104,13 @@ namespace IMSServer.Controllers
         [ResponseType(typeof(DeviceModel))]
         public async Task<IHttpActionResult> DeleteDeviceModel(long id)
         {
-            DeviceModel deviceModel = await _dbContext.DeviceModels.FindAsync(id);
+            DeviceModel deviceModel = await _deviceRepository.RemoveAsync(id);
             if (deviceModel == null)
             {
                 return NotFound();
             }
 
-            _dbContext.DeviceModels.Remove(deviceModel);
-            await _dbContext.SaveChangesAsync();
-
             return Ok(deviceModel);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                _dbContext.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        private bool DeviceModelExists(long id)
-        {
-            return _dbContext.DeviceModels.Count(e => e.Id == id) > 0;
         }
     }
 }

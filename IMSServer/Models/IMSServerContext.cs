@@ -13,6 +13,7 @@ namespace IMSServer.Models
     
         public IMSServerContext() : base("name=IMSServerContext")
         {
+
         }
 
         public DbSet<GroupModel> GroupModels { get; set; }

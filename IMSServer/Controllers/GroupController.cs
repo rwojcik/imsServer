@@ -23,16 +23,16 @@ namespace IMSServer.Controllers
         // GET: api/Group
         public IEnumerable<GroupViewModel> GetGroupModels()
         {
-            return _repository.GetAll().Select(building => new GroupViewModel
+            return _repository.GetAll().Select(groupModel => new GroupViewModel
             {
-                BuildingId = building.Id,
-                CreatedAt = building.CreatedAt,
-                CreatedBy = building.CreatedBy,
-                Description = building.Description,
-                DevicesIds = building.Devices.Select(device => device.Id).ToList(),
-                Name = building.Name,
-                UpdatedAt = building.UpdatedAt,
-                UpdatedBy = building.CreatedBy,
+                GroupId = groupModel.Id,
+                CreatedAt = groupModel.CreatedAt,
+                CreatedBy = groupModel.CreatedBy,
+                Description = groupModel.Description,
+                DevicesIds = groupModel.Devices.Select(device => device.Id).ToList(),
+                Name = groupModel.Name,
+                UpdatedAt = groupModel.UpdatedAt,
+                UpdatedBy = groupModel.CreatedBy,
             });
         }
 
@@ -40,25 +40,25 @@ namespace IMSServer.Controllers
         [ResponseType(typeof(GroupViewModel))]
         public async Task<IHttpActionResult> GetGroupModel(long id)
         {
-            var buildingModel = await _repository.FindAsync(id);
-            if (buildingModel == null)
+            var groupModel = await _repository.FindAsync(id);
+            if (groupModel == null)
             {
                 return NotFound();
             }
 
-            var buildingVm = new GroupViewModel
+            var groupViewModel = new GroupViewModel
             {
-                BuildingId = buildingModel.Id,
-                CreatedAt = buildingModel.CreatedAt,
-                CreatedBy = buildingModel.CreatedBy,
-                Description = buildingModel.Description,
-                DevicesIds = buildingModel.Devices.Select(device => device.Id).ToList(),
-                Name = buildingModel.Name,
-                UpdatedAt = buildingModel.UpdatedAt,
-                UpdatedBy = buildingModel.CreatedBy,
+                GroupId = groupModel.Id,
+                CreatedAt = groupModel.CreatedAt,
+                CreatedBy = groupModel.CreatedBy,
+                Description = groupModel.Description,
+                DevicesIds = groupModel.Devices.Select(device => device.Id).ToList(),
+                Name = groupModel.Name,
+                UpdatedAt = groupModel.UpdatedAt,
+                UpdatedBy = groupModel.CreatedBy,
             };
 
-            return Ok(buildingVm);
+            return Ok(groupViewModel);
         }
 
         // PUT: api/Group/5
@@ -76,7 +76,7 @@ namespace IMSServer.Controllers
                 return BadRequest("Ids do not match");
             }
 
-            var buildingModel = new GroupModel
+            var groupModel = new GroupModel
             {
                 Id = groupVm.GroupId,
                 Description = groupVm.Description,
@@ -85,7 +85,7 @@ namespace IMSServer.Controllers
 
             try
             {
-                if (await _repository.UpdateAsync(buildingModel) == null)
+                if (await _repository.UpdateAsync(groupModel) == null)
                 {
                     return NotFound();
                 }
@@ -108,7 +108,7 @@ namespace IMSServer.Controllers
                 return BadRequest(ModelState);
             }
 
-            var buildingModel = new GroupModel
+            var groupModel = new GroupModel
             {
                 Name = groupVm.Name,
                 Description = groupVm.Description,
@@ -116,40 +116,40 @@ namespace IMSServer.Controllers
             
             try
             {
-                await _repository.AddAsync(buildingModel);
+                await _repository.AddAsync(groupModel);
             }
             catch (DbUpdateException)
             {
                 return BadRequest();
             }
 
-            return CreatedAtRoute("DefaultApi", new { id = buildingModel.Id }, buildingModel);
+            return CreatedAtRoute("DefaultApi", new { id = groupModel.Id }, groupModel);
         }
 
         // DELETE: api/Group/5
         [ResponseType(typeof(GroupModel))]
         public async Task<IHttpActionResult> DeleteGroupModel(long id)
         {
-            var buildingModel = await _repository.RemoveAsync(id);
+            var groupModel = await _repository.RemoveAsync(id);
 
-            if (buildingModel == null)
+            if (groupModel == null)
             {
                 return NotFound();
             }
 
-            var buildingVm = new GroupViewModel
+            var groupViewModel = new GroupViewModel
             {
-                BuildingId = buildingModel.Id,
-                CreatedAt = buildingModel.CreatedAt,
-                CreatedBy = buildingModel.CreatedBy,
-                Description = buildingModel.Description,
-                DevicesIds = buildingModel.Devices.Select(device => device.Id).ToList(),
-                Name = buildingModel.Name,
-                UpdatedAt = buildingModel.UpdatedAt,
-                UpdatedBy = buildingModel.CreatedBy
+                GroupId = groupModel.Id,
+                CreatedAt = groupModel.CreatedAt,
+                CreatedBy = groupModel.CreatedBy,
+                Description = groupModel.Description,
+                DevicesIds = groupModel.Devices.Select(device => device.Id).ToList(),
+                Name = groupModel.Name,
+                UpdatedAt = groupModel.UpdatedAt,
+                UpdatedBy = groupModel.CreatedBy
             };
 
-            return Ok(buildingVm);
+            return Ok(groupViewModel);
         }
     }
 }

@@ -14,30 +14,26 @@ namespace IMSServer.Tests.Models
             var devicesGroup = new GroupModel
             {
                 Id = 1,
-                CreatedAt = DateTime.Now,
-                CreatedBy = "TestUser",
                 Description = "TestDescription",
                 Devices = new List<DeviceModel>(),
                 Name = "TestGroup",
-                UpdatedBy = "TestUser",
-                UpdatedAt = DateTime.Now,
             };
+
+            devicesGroup.AuditEntity("TestUser");
 
             var model = new ContinousSettingDeviceModel
             {
                 Id = 1,
                 ContinousSetting = 20.5d,
-                CreatedAt = DateTime.Now,
-                CreatedBy = "TestUser",
                 Description = "TestDescription",
                 DeviceHistory = new List<DeviceHistoryModel>(),
-                UpdatedBy = "TestUser",
-                UpdatedAt = DateTime.Now,
                 Name = "TestDevice",
                 DeviceType = DeviceType.Thermometer,
                 Group = devicesGroup,
                 GroupId = devicesGroup.Id,
             };
+
+            model.AuditEntity("TestUser");
 
             var historyEntity = model.CreateDeviceHistoryModel();
 
@@ -58,31 +54,27 @@ namespace IMSServer.Tests.Models
             var devicesGroup = new GroupModel
             {
                 Id = 1,
-                CreatedAt = DateTime.Now,
-                CreatedBy = "TestUser",
                 Description = "TestDescription",
                 Devices = new List<DeviceModel>(),
                 Name = "TestGroup",
-                UpdatedBy = "TestUser",
-                UpdatedAt = DateTime.Now,
             };
 
+            devicesGroup.AuditEntity("TestUser");
+            
             var model = new BinarySettingDeviceModel
             {
                 Id = 1,
                 BinarySetting = false,
-                CreatedAt = DateTime.Now,
-                CreatedBy = "TestUser",
                 Description = "TestDescription",
                 DeviceHistory = new List<DeviceHistoryModel>(),
-                UpdatedBy = "TestUser",
-                UpdatedAt = DateTime.Now,
                 Name = "TestDevice",
                 DeviceType = DeviceType.Thermometer,
                 Group = devicesGroup,
                 GroupId = devicesGroup.Id,
             };
 
+            model.AuditEntity("TestUser");
+            
             var historyEntity = model.CreateDeviceHistoryModel();
 
             Assert.IsNotNull(historyEntity);

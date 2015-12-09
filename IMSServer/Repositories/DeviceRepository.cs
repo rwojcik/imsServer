@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
 using IMSServer.Models;
 
@@ -12,8 +11,11 @@ namespace IMSServer.Repositories
     public class DeviceRepository : IRepository<DeviceModel>
     {
         private readonly IMSServerContext _dbContext;
-        public DeviceRepository()
+        private readonly string _userName;
+
+        public DeviceRepository(string userName)
         {
+            _userName = userName;
             _dbContext = new IMSServerContext();
         }
 
@@ -74,6 +76,9 @@ namespace IMSServer.Repositories
 
             var historyEntry = newEntity.CreateDeviceHistoryModel();
 
+            if(newEntity.DeviceHistory == null)
+                newEntity.DeviceHistory = new List<DeviceHistoryModel>(0);
+
             newEntity.DeviceHistory.Add(historyEntry);
 
             await _dbContext.SaveChangesAsync();
@@ -110,7 +115,8 @@ namespace IMSServer.Repositories
             if (old == null) return null;
 
             old.UpdateModelGeneric(entity);
-
+            old.AuditEntity(_userName);
+            
             _dbContext.SaveChanges();
 
             return old;
@@ -123,6 +129,7 @@ namespace IMSServer.Repositories
             if (old == null) return null;
 
             old.UpdateModelGeneric(entity);
+            old.AuditEntity(_userName);
 
             await _dbContext.SaveChangesAsync();
 

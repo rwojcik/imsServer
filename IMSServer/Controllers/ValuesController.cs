@@ -3,7 +3,8 @@ using System.Web.Http;
 
 namespace IMSServer.Controllers
 {
-    [AllowAnonymous]
+    //[AllowAnonymous]
+    [Authorize]
     public class ValuesController : ApiController
     {
         // GET api/values
@@ -14,6 +15,7 @@ namespace IMSServer.Controllers
         }
 
         // GET api/values/5
+        
         public string Get(int id)
         {
             return $"value {id}";

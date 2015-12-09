@@ -22,4 +22,19 @@ namespace IMSServer.Models
         [Required]
         public string UpdatedBy { get; set; }
     }
+
+    public static class ModelOps
+    {
+        public static void AuditEntity(this ModelBase model, string userName)
+        {
+            if (string.IsNullOrEmpty(model.CreatedBy))
+            {
+                model.CreatedBy = userName;
+                model.CreatedAt = DateTime.Now;
+            }
+
+            model.UpdatedBy = userName;
+            model.UpdatedAt = DateTime.Now;
+        }
+    }
 }

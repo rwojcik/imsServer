@@ -1,13 +1,18 @@
-﻿using System;
+﻿using IMSServer.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace IMSServer.Models
 {
     public abstract class DeviceModel : ModelBase
     {
-        [Required, Index("UniqueDeviceName", IsUnique = true)]
+        [Required, Index("UniqueDeviceGuid", IsUnique = true), DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public Guid Guid { get; set; }
+
+        [Required, Index("UniqueDeviceName", IsUnique = true), StringLength(250)]
         public string Name { get; set; }
 
         public string Description { get; set; }
@@ -55,8 +60,6 @@ namespace IMSServer.Models
 
             oldModel.Name = newModel.Name;
             oldModel.Description = newModel.Description;
-            oldModel.UpdatedAt = DateTime.Now;
-            oldModel.UpdatedBy = newModel.UpdatedBy;
 
             if (oldModel is BinarySettingDeviceModel)
             {
@@ -75,22 +78,22 @@ namespace IMSServer.Models
             }
         }
 
-        public static DeviceHistoryModel CreateDeviceHistoryModel(this DeviceModel model)
+        public static DeviceHistoryModel CreateDeviceHistoryModel(this DeviceModel deviceModel)
         {
             DeviceHistoryModel historyModel = null;
 
-            if (model is BinarySettingDeviceModel)
+            if (deviceModel is BinarySettingDeviceModel)
             {
-                var binaryModel = (BinarySettingDeviceModel)model;
+                var binaryModel = (BinarySettingDeviceModel)deviceModel;
 
                 historyModel = new BinaryDeviceHistoryModel
                 {
                     BinarySetting = binaryModel.BinarySetting
                 };
             }
-            else if (model is ContinousSettingDeviceModel)
+            else if (deviceModel is ContinousSettingDeviceModel)
             {
-                var continousModel = (ContinousSettingDeviceModel)model;
+                var continousModel = (ContinousSettingDeviceModel)deviceModel;
 
                 historyModel = new ContinousDeviceHistoryModel
                 {
@@ -98,14 +101,80 @@ namespace IMSServer.Models
                 };
             }
 
-            if(historyModel == null) throw new IncompatibleTypeException($"Given type {model.GetType()} was not recognized.");
+            if (historyModel == null) throw new IncompatibleTypeException($"Given type {deviceModel.GetType()} was not recognized.");
 
-            historyModel.ChangedBy = model.UpdatedBy;
-            historyModel.RecordedAt = model.UpdatedAt;
-            historyModel.Device = model;
-            historyModel.DeviceId = model.Id;
-            
+            historyModel.ChangedBy = deviceModel.UpdatedBy;
+            historyModel.RecordedAt = deviceModel.UpdatedAt;
+            historyModel.Device = deviceModel;
+            historyModel.DeviceId = deviceModel.Id;
+
             return historyModel;
+        }
+
+        public static DeviceModel CreateDeviceModel(this AddDeviceViewModel addDeviceViewModel)
+        {
+            if (addDeviceViewModel.Discriminator == "Continous")
+            {
+                if (!addDeviceViewModel.ContinousSetting.HasValue)
+                    return null;
+
+                return new ContinousSettingDeviceModel
+                {
+                    GroupId = addDeviceViewModel.GroupId,
+                    ContinousSetting = addDeviceViewModel.ContinousSetting.Value,
+                    Description = addDeviceViewModel.Description,
+                    DeviceType = addDeviceViewModel.DeviceType,
+                    Name = addDeviceViewModel.Name,
+                };
+            }
+            else if (addDeviceViewModel.Discriminator == "Binary")
+            {
+                if (!addDeviceViewModel.BinarySetting.HasValue)
+                    return null;
+
+                return new BinarySettingDeviceModel
+                {
+                    GroupId = addDeviceViewModel.GroupId,
+                    BinarySetting = addDeviceViewModel.BinarySetting.Value,
+                    Description = addDeviceViewModel.Description,
+                    DeviceType = addDeviceViewModel.DeviceType,
+                    Name = addDeviceViewModel.Name,
+                };
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static DeviceViewModel CreateDeviceViewModel(this DeviceModel deviceModel)
+        {
+
+            var deviceViewModel = new DeviceViewModel
+            {
+                Description = deviceModel.Description,
+                DeviceId = deviceModel.Id,
+                GroupId = deviceModel.GroupId,
+                Name = deviceModel.Name,
+                DeviceType = deviceModel.DeviceType
+            };
+
+            if (deviceModel is ContinousSettingDeviceModel)
+            {
+                deviceViewModel.Discriminator = "Continous";
+                deviceViewModel.ContinousSetting = ((ContinousSettingDeviceModel)deviceModel).ContinousSetting;
+            }
+            else if (deviceModel is BinarySettingDeviceModel)
+            {
+                deviceViewModel.Discriminator = "Binary";
+                deviceViewModel.BinarySetting = ((BinarySettingDeviceModel)deviceModel).BinarySetting;
+            }
+            else
+            {
+                throw new IncompatibleTypeException($"Given type {deviceModel.GetType()} was not recognized.");
+            }
+            
+            return deviceViewModel;
         }
     }
 

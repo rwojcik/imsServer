@@ -5,7 +5,7 @@ namespace IMSServer.ViewModels
 {
     public class GroupViewModel
     {
-        public long BuildingId { get; set; }
+        public long GroupId { get; set; }
 
         public string Name { get; set; }
 
