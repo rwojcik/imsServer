@@ -12,9 +12,11 @@ namespace IMSServer.Repositories
     public class GroupRepository : IRepository<GroupModel>
     {
         private readonly IMSServerContext _dbContext;
+        private readonly string _userName;
 
-        public GroupRepository()
+        public GroupRepository(string userName)
         {
+            _userName = userName;
             _dbContext = new IMSServerContext();
         }
 
@@ -30,12 +32,12 @@ namespace IMSServer.Repositories
 
         public IEnumerable<GroupModel> GetAll(Expression<Func<GroupModel, bool>> predicate)
         {
-            return _dbContext.GroupModels.Where(predicate);
+            return _dbContext.GroupModels.Include(gr => gr.Devices).Where(predicate);
         }
 
         public IEnumerable<GroupModel> GetAll()
         {
-            return _dbContext.GroupModels.AsEnumerable();
+            return _dbContext.GroupModels.Include(gr => gr.Devices);
         }
         
         public GroupModel GetFirst(Expression<Func<GroupModel, bool>> predicate)
@@ -51,7 +53,7 @@ namespace IMSServer.Repositories
         public GroupModel Add(GroupModel entity)
         {
             if (entity == null) return null;
-            
+            entity.AuditEntity(_userName);
             var newEntity = _dbContext.GroupModels.Add(entity);
             _dbContext.SaveChanges();
             return newEntity;
@@ -60,7 +62,8 @@ namespace IMSServer.Repositories
         public async Task<GroupModel> AddAsync(GroupModel entity)
         {
             if (entity == null) return null;
-            
+            entity.AuditEntity(_userName);
+
             var newEntity = _dbContext.GroupModels.Add(entity);
 
             await _dbContext.SaveChangesAsync();
@@ -98,8 +101,7 @@ namespace IMSServer.Repositories
 
             old.Name = entity.Name;
             old.Description = entity.Description;
-            old.UpdatedAt = DateTime.Now;
-            old.UpdatedBy = entity.UpdatedBy;
+            old.AuditEntity(_userName);
 
             _dbContext.SaveChanges();
 
@@ -114,9 +116,8 @@ namespace IMSServer.Repositories
 
             old.Name = entity.Name;
             old.Description = entity.Description;
-            old.UpdatedAt = DateTime.Now;
-            old.UpdatedBy = entity.UpdatedBy;
-            
+            old.AuditEntity(_userName);
+
             await _dbContext.SaveChangesAsync();
 
             return old;

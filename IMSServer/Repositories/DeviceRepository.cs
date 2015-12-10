@@ -21,7 +21,7 @@ namespace IMSServer.Repositories
 
         public DeviceModel Get(long id)
         {
-            return _dbContext.DeviceModels.FirstOrDefault(d => d.Id == id);
+            return _dbContext.DeviceModels.Include(dev => dev.DeviceHistory).FirstOrDefault(d => d.Id == id);
         }
 
         public Task<DeviceModel> FindAsync(long id)
@@ -31,7 +31,7 @@ namespace IMSServer.Repositories
 
         public IEnumerable<DeviceModel> GetAll(Expression<Func<DeviceModel, bool>> predicate)
         {
-            return _dbContext.DeviceModels.Where(predicate);
+            return _dbContext.DeviceModels.Where(predicate).AsEnumerable();
         }
 
         public IEnumerable<DeviceModel> GetAll()
@@ -53,6 +53,8 @@ namespace IMSServer.Repositories
         {
             if (entity == null) return null;
 
+            entity.AuditEntity(_userName);
+
             var newEntity = _dbContext.DeviceModels.Add(entity);
             
             _dbContext.SaveChanges();
@@ -69,6 +71,8 @@ namespace IMSServer.Repositories
         public async Task<DeviceModel> AddAsync(DeviceModel entity)
         {
             if (entity == null) return null;
+
+            entity.AuditEntity(_userName);
 
             var newEntity = _dbContext.DeviceModels.Add(entity);
 

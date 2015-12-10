@@ -13,7 +13,7 @@ namespace IMSServer.Models
     
         public IMSServerContext() : base("name=IMSServerContext")
         {
-
+            Database.SetInitializer<IMSServerContext>(new DropCreateDatabaseIfModelChanges<IMSServerContext>());
         }
 
         public DbSet<GroupModel> GroupModels { get; set; }

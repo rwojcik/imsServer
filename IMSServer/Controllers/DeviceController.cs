@@ -10,15 +10,15 @@ using IMSServer.ViewModels;
 
 namespace IMSServer.Controllers
 {
+    [Authorize]
     public class DeviceController : ApiController
     {
         private readonly DeviceRepository _deviceRepository;
-        private readonly string _userName;
 
         public DeviceController()
         {
-            _userName = User?.Identity?.Name ?? "Anonymous";
-            _deviceRepository = new DeviceRepository(_userName);
+            var userName = User?.Identity?.Name ?? "Anonymous";
+            _deviceRepository = new DeviceRepository(userName);
         }
 
         // GET: api/Device
@@ -70,7 +70,6 @@ namespace IMSServer.Controllers
             deviceModel.Name = updateDeviceViewModel.Name;
             deviceModel.Description = updateDeviceViewModel.Description;
             deviceModel.GroupId = updateDeviceViewModel.GroupId;
-            deviceModel.AuditEntity(_userName);
 
             await _deviceRepository.UpdateAsync(deviceModel);
 
@@ -92,16 +91,14 @@ namespace IMSServer.Controllers
                 return BadRequest("Name is taken");
 
             var deviceModel = addDeviceViewModel.CreateDeviceModel();
-
-            deviceModel.AuditEntity(_userName);
-
+            
             await _deviceRepository.AddAsync(deviceModel);
 
-            return CreatedAtRoute("DefaultApi", new { id = deviceModel.Id }, deviceModel);
+            return CreatedAtRoute("DefaultApi", new { id = deviceModel.Id }, deviceModel.CreateDeviceViewModel());
         }
 
         // DELETE: api/Device/5
-        [ResponseType(typeof(DeviceModel))]
+        [ResponseType(typeof(DeviceViewModel))]
         public async Task<IHttpActionResult> DeleteDeviceModel(long id)
         {
             DeviceModel deviceModel = await _deviceRepository.RemoveAsync(id);
@@ -110,7 +107,7 @@ namespace IMSServer.Controllers
                 return NotFound();
             }
 
-            return Ok(deviceModel);
+            return Ok(deviceModel.CreateDeviceViewModel());
         }
     }
 }

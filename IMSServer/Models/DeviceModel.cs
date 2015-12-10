@@ -9,8 +9,9 @@ namespace IMSServer.Models
 {
     public abstract class DeviceModel : ModelBase
     {
-        [Required, Index("UniqueDeviceGuid", IsUnique = true), DatabaseGenerated(DatabaseGeneratedOption.Computed)]
-        public Guid Guid { get; set; }
+        //[Required, Index("UniqueDeviceGuid", IsUnique = true), DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        //public Guid Guid { get; set; }
+        //bug
 
         [Required, Index("UniqueDeviceName", IsUnique = true), StringLength(250)]
         public string Name { get; set; }
@@ -107,6 +108,8 @@ namespace IMSServer.Models
             historyModel.RecordedAt = deviceModel.UpdatedAt;
             historyModel.Device = deviceModel;
             historyModel.DeviceId = deviceModel.Id;
+            historyModel.UpdatedAt = deviceModel.UpdatedAt;
+            historyModel.UpdatedBy = deviceModel.UpdatedBy;
 
             return historyModel;
         }
@@ -173,7 +176,7 @@ namespace IMSServer.Models
             {
                 throw new IncompatibleTypeException($"Given type {deviceModel.GetType()} was not recognized.");
             }
-            
+
             return deviceViewModel;
         }
     }

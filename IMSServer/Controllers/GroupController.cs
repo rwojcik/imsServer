@@ -2,38 +2,34 @@
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using IMSServer.Models;
 using IMSServer.Repositories;
 using IMSServer.ViewModels;
+using Microsoft.AspNet.Identity;
 
 namespace IMSServer.Controllers
 {
+    [Authorize]
     public class GroupController : ApiController
     {
         private readonly GroupRepository _repository;
 
         public GroupController()
         {
-            _repository = new GroupRepository();
+
+            var userName = User?.Identity?.Name ?? "Anonymous";
+
+            _repository = new GroupRepository(userName);
         }
 
         // GET: api/Group
         public IEnumerable<GroupViewModel> GetGroupModels()
         {
-            return _repository.GetAll().Select(groupModel => new GroupViewModel
-            {
-                GroupId = groupModel.Id,
-                CreatedAt = groupModel.CreatedAt,
-                CreatedBy = groupModel.CreatedBy,
-                Description = groupModel.Description,
-                DevicesIds = groupModel.Devices.Select(device => device.Id).ToList(),
-                Name = groupModel.Name,
-                UpdatedAt = groupModel.UpdatedAt,
-                UpdatedBy = groupModel.CreatedBy,
-            });
+            return _repository.GetAll().ToList().Select(groupModel => groupModel.CreateGroupViewModel());
         }
 
         // GET: api/Group/5
@@ -46,19 +42,7 @@ namespace IMSServer.Controllers
                 return NotFound();
             }
 
-            var groupViewModel = new GroupViewModel
-            {
-                GroupId = groupModel.Id,
-                CreatedAt = groupModel.CreatedAt,
-                CreatedBy = groupModel.CreatedBy,
-                Description = groupModel.Description,
-                DevicesIds = groupModel.Devices.Select(device => device.Id).ToList(),
-                Name = groupModel.Name,
-                UpdatedAt = groupModel.UpdatedAt,
-                UpdatedBy = groupModel.CreatedBy,
-            };
-
-            return Ok(groupViewModel);
+            return Ok(groupModel.CreateGroupViewModel());
         }
 
         // PUT: api/Group/5
@@ -76,12 +60,22 @@ namespace IMSServer.Controllers
                 return BadRequest("Ids do not match");
             }
 
-            var groupModel = new GroupModel
+            var groupModel = await _repository.FindAsync(id);
+
+            if (groupModel == null)
             {
-                Id = groupVm.GroupId,
-                Description = groupVm.Description,
-                Name = groupVm.Name,
-            };
+                return NotFound();
+            }
+
+            //jeżeli zmienia sięnazwę to trzeba sprawdzić czy nowa nie jest zajęta
+            if (groupVm.Name != groupModel.Name) 
+            {
+                var checkName = await _repository.GetFirstAsync(dev => dev.Name == groupVm.Name);
+                if(checkName != null)
+                    return BadRequest("Name is taken");
+            }
+            groupModel.Name = groupVm.Name;
+            groupModel.Description = groupVm.Description;
 
             try
             {
@@ -100,7 +94,7 @@ namespace IMSServer.Controllers
 
         // POST: api/Group
         // Add
-        [ResponseType(typeof(GroupModel))]
+        [ResponseType(typeof(GroupViewModel))]
         public async Task<IHttpActionResult> PostGroupModel(AddGroupViewModel groupVm)
         {
             if (!ModelState.IsValid)
@@ -108,6 +102,13 @@ namespace IMSServer.Controllers
                 return BadRequest(ModelState);
             }
 
+            var existingGroup = await _repository.GetFirstAsync(gr => gr.Name == groupVm.Name);
+
+            if (existingGroup != null)
+            {
+                return BadRequest("Name is taken");
+            }
+            
             var groupModel = new GroupModel
             {
                 Name = groupVm.Name,
@@ -123,7 +124,7 @@ namespace IMSServer.Controllers
                 return BadRequest();
             }
 
-            return CreatedAtRoute("DefaultApi", new { id = groupModel.Id }, groupModel);
+            return CreatedAtRoute("DefaultApi", new { id = groupModel.Id }, groupModel.CreateGroupViewModel());
         }
 
         // DELETE: api/Group/5
@@ -136,20 +137,8 @@ namespace IMSServer.Controllers
             {
                 return NotFound();
             }
-
-            var groupViewModel = new GroupViewModel
-            {
-                GroupId = groupModel.Id,
-                CreatedAt = groupModel.CreatedAt,
-                CreatedBy = groupModel.CreatedBy,
-                Description = groupModel.Description,
-                DevicesIds = groupModel.Devices.Select(device => device.Id).ToList(),
-                Name = groupModel.Name,
-                UpdatedAt = groupModel.UpdatedAt,
-                UpdatedBy = groupModel.CreatedBy
-            };
-
-            return Ok(groupViewModel);
+            
+            return Ok(groupModel.CreateGroupViewModel());
         }
     }
 }
