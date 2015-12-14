@@ -7,6 +7,7 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
 using IMSServer.Models;
+using Microsoft.AspNet.Identity;
 
 namespace IMSServer.Providers
 {
@@ -38,9 +39,14 @@ namespace IMSServer.Providers
 
             ClaimsIdentity oAuthIdentity = await user.GenerateUserIdentityAsync(userManager,
                OAuthDefaults.AuthenticationType);
+            oAuthIdentity.AddClaim(new Claim("sub", context.UserName));
+            oAuthIdentity.AddClaim(new Claim("role", "user"));
+            oAuthIdentity.AddClaim(new Claim(ClaimTypes.Name, context.UserName));
+            oAuthIdentity.AddClaim(new Claim(ClaimTypes.Role, "user"));
+            
             ClaimsIdentity cookiesIdentity = await user.GenerateUserIdentityAsync(userManager,
                 CookieAuthenticationDefaults.AuthenticationType);
-
+            
             AuthenticationProperties properties = CreateProperties(user.UserName);
             AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, properties);
             context.Validated(ticket);
@@ -53,6 +59,8 @@ namespace IMSServer.Providers
             {
                 context.AdditionalResponseParameters.Add(property.Key, property.Value);
             }
+
+            context.AdditionalResponseParameters.Add("userID", context.Identity.GetUserId());
 
             return Task.FromResult<object>(null);
         }

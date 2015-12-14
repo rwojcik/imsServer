@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
 using IMSServer.Models;
 using IMSServer.Repositories;
 using IMSServer.ViewModels;
+using Microsoft.AspNet.Identity;
 
 namespace IMSServer.Controllers
 {
@@ -17,7 +20,8 @@ namespace IMSServer.Controllers
 
         public DeviceController()
         {
-            var userName = User?.Identity?.Name ?? "Anonymous";
+            var userName = User?.Identity?.GetUserName() ?? "Anonymous";
+            
             _deviceRepository = new DeviceRepository(userName);
         }
 
@@ -91,7 +95,7 @@ namespace IMSServer.Controllers
                 return BadRequest("Name is taken");
 
             var deviceModel = addDeviceViewModel.CreateDeviceModel();
-            
+
             await _deviceRepository.AddAsync(deviceModel);
 
             return CreatedAtRoute("DefaultApi", new { id = deviceModel.Id }, deviceModel.CreateDeviceViewModel());

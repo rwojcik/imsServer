@@ -20,7 +20,7 @@ namespace IMSServer.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
+            : base("IMSServerIdentityContext", throwIfV1Schema: false)
         {
         }
         
