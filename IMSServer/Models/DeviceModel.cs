@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace IMSServer.Models
@@ -159,7 +160,8 @@ namespace IMSServer.Models
                 DeviceId = deviceModel.Id,
                 GroupId = deviceModel.GroupId,
                 Name = deviceModel.Name,
-                DeviceType = deviceModel.DeviceType
+                DeviceType = deviceModel.DeviceType,
+                History = deviceModel.DeviceHistory?.Take(10).Select(dev => dev.CreateDeviceHistoryViewModel()),
             };
 
             if (deviceModel is ContinousSettingDeviceModel)

@@ -120,6 +120,7 @@ namespace IMSServer.Repositories
 
             old.UpdateModelGeneric(entity);
             old.AuditEntity(_userName);
+            old.DeviceHistory.Add(old.CreateDeviceHistoryModel());
             
             _dbContext.SaveChanges();
 
@@ -134,6 +135,7 @@ namespace IMSServer.Repositories
 
             old.UpdateModelGeneric(entity);
             old.AuditEntity(_userName);
+            old.DeviceHistory.Add(old.CreateDeviceHistoryModel());
 
             await _dbContext.SaveChangesAsync();
 

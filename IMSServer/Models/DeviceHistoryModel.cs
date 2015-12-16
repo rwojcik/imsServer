@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using IMSServer.ViewModels;
 
 namespace IMSServer.Models
 {
@@ -35,5 +37,32 @@ namespace IMSServer.Models
     public class ContinousDeviceHistoryModel : DeviceHistoryModel
     {
         public double ContinousSetting { get; set; }
+    }
+
+    public static class DeviceHistoryOps
+    {
+        public static DeviceHistoryViewModel CreateDeviceHistoryViewModel(this DeviceHistoryModel model)
+        {
+            if (model == null) return null;
+
+            var deviceHistoryViewModel = new DeviceHistoryViewModel
+            {
+                ChangedBy = model.ChangedBy,
+                RecordedAt = model.RecordedAt
+            };
+
+            if (model is ContinousDeviceHistoryModel)
+            {
+                deviceHistoryViewModel.Discriminator = "Continous";
+                deviceHistoryViewModel.ContinousSetting = ((ContinousDeviceHistoryModel) model).ContinousSetting;
+            }
+            else if(model is BinaryDeviceHistoryModel)
+            {
+                deviceHistoryViewModel.Discriminator = "Binary";
+                deviceHistoryViewModel.BinarySetting = ((BinaryDeviceHistoryModel) model).BinarySetting;
+            }
+            
+            return deviceHistoryViewModel;
+        }
     }
 }
