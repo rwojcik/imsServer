@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
 using IMSServer.Models;
@@ -21,16 +19,21 @@ namespace IMSServer.Controllers
         public DeviceController()
         {
             var userName = User?.Identity?.GetUserName() ?? "Anonymous";
-            
+
             _deviceRepository = new DeviceRepository(userName);
         }
 
         // GET: api/Device
-        public IEnumerable<DeviceViewModel> GetDeviceModels()
+        public IEnumerable<DeviceViewModel> GetDeviceModels(long? groupId = null)
         {
-            var devices = _deviceRepository.GetAll().Select(device => device.CreateDeviceViewModel());
+            IEnumerable<DeviceModel> devices;
 
-            return devices;
+            if (groupId == null)
+                devices = _deviceRepository.GetAll();
+            else
+                devices = _deviceRepository.GetAll(device => device.GroupId == groupId.Value);
+
+            return devices.Select(device => device.CreateDeviceViewModel());
         }
 
         // GET: api/Device/5

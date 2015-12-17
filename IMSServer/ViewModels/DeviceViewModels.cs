@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using IMSServer.Models;
+using Newtonsoft.Json;
 
 namespace IMSServer.ViewModels
 {
@@ -21,8 +22,10 @@ namespace IMSServer.ViewModels
 
         public string Discriminator { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public double? ContinousSetting { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool? BinarySetting { get; set; }
     }
 
@@ -38,8 +41,10 @@ namespace IMSServer.ViewModels
         [Required]
         public string Discriminator { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public double? ContinousSetting { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool? BinarySetting { get; set; }
 
     }
@@ -63,8 +68,10 @@ namespace IMSServer.ViewModels
         
         public string Discriminator { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public double? ContinousSetting { get; set; }
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public bool? BinarySetting { get; set; }
     }
 }
