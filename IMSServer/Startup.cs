@@ -17,6 +17,8 @@ namespace IMSServer
             Task.Factory.StartNew(StartDiscoveryServer);
 
             ConfigureAuth(app);
+
+            app.MapSignalR();
         }
 
         private void StartDiscoveryServer()
