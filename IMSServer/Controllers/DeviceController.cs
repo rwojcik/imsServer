@@ -78,6 +78,19 @@ namespace IMSServer.Controllers
             deviceModel.Description = updateDeviceViewModel.Description;
             deviceModel.GroupId = updateDeviceViewModel.GroupId;
 
+            if (updateDeviceViewModel.Discriminator == "Continous" && updateDeviceViewModel.ContinousSetting.HasValue && deviceModel is ContinousSettingDeviceModel)
+            {
+                ((ContinousSettingDeviceModel) deviceModel).ContinousSetting = updateDeviceViewModel.ContinousSetting.Value;
+            }
+            else if (updateDeviceViewModel.Discriminator == "Binary" && updateDeviceViewModel.BinarySetting.HasValue && deviceModel is BinarySettingDeviceModel)
+            {
+                ((BinarySettingDeviceModel)deviceModel).BinarySetting = updateDeviceViewModel.BinarySetting.Value;
+            }
+            else
+            {
+                return BadRequest($"Incompatible discriminator and model type, got {updateDeviceViewModel.Discriminator}.");
+            }
+
             await _deviceRepository.UpdateAsync(deviceModel);
 
             return StatusCode(HttpStatusCode.NoContent);

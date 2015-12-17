@@ -58,6 +58,15 @@ namespace IMSServer.ViewModels
         public string Description { get; set; }
         [Required]
         public long GroupId { get; set; }
+
+        [Required]
+        public string Discriminator { get; set; }
+        
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public double? ContinousSetting { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public bool? BinarySetting { get; set; }
     }
 
     public class DeviceHistoryViewModel
